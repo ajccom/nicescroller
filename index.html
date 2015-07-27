@@ -12,6 +12,11 @@
     <script src="src/nicescroller.js"></script>
     <style>
     * {margin: 0; padding: 0}
+    .dom-unit {padding: 20px 0}
+    .code-unit {padding: 10px 0}
+    @media screen and (max-width: 800px) {
+      .code-unit {display: none}
+    }
     .block {overflow: hidden}
     .scroll-content {
       background-image: -moz-linear-gradient(left top, #155799, #159957);
@@ -100,8 +105,7 @@
       </script>
       <div class="code-unit"><pre>
 var scroller3 = new NiceScroller('#scroller3')
-var scroller4 = new NiceScroller('#scroller4')
-      </pre></div>
+var scroller4 = new NiceScroller('#scroller4')</pre></div>
       
       <h3>查看更多请前往<a href="https://github.com/ajccom/nicescroller">README</a></h3>
       
