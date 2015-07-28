@@ -44,7 +44,7 @@ y | Number | - | 初始Y轴位置
 onscrollend | Function | - | 惯性滑动动画完成时触发
 ontouchstart | Function | - | 用户碰触滑动区时触发，返回false可以停止后续事件处理
 ontouchend | Function | - | 用户结束碰触时触发
-deceleration | Number | - | 惯性滑动的阻力系数
+deceleration | Number | 0.0006 | 惯性滑动的阻力系数
 
 ## 方法
 
