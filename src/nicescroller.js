@@ -44,7 +44,7 @@
       y: y
     }
     
-    if (this.cfg.scrollBar) {_updateBar.apply(this)}
+    if (this.cfg.scrollbar) {_updateBar.apply(this)}
   }
   
   function _updateBar () {
@@ -138,6 +138,7 @@
         currentY = args.y
         _setDist.call(that, currentX, currentY)
         that.jBox.removeClass('active')
+        that.cfg.onscrollend && that.cfg.onscrollend.apply(that)
         return
       }
       
@@ -162,9 +163,14 @@
    */
   
   var _defaultConfig = {
-    scrollBar: true,
+    scrollbar: true,
     momentum: true,
     animation: 'ease-out',
+    //x: 0,
+    //y: 0,
+    //onscrollend: function () {},
+    //ontouchstart: function () {},
+    //ontouchend: function () {},
     deceleration: 0.0006
   }
   
@@ -219,6 +225,7 @@
   }
     
   function _start (e) {
+    if (this.cfg.ontouchstart && !this.cfg.ontouchstart.apply(this)) {return}
     _cancelAnimate.apply(this)
     this.touched = true
     _touchedScroller.push(this)
@@ -226,6 +233,7 @@
     m = o
     _setPoint.call(this)
     startTime = +new Date
+    
   }
   
   function _move (e) {
@@ -249,16 +257,23 @@
       deceleration = _currentScroller.cfg.deceleration,
       wrapperSize = _currentScroller.wrapperSize,
       time,
-      dir = _currentScroller.dir
+      dir = _currentScroller.dir,
+      maxScrollWidth = _currentScroller.maxScrollWidth,
+      maxScrollHeight = _currentScroller.maxScrollHeight
     if (deltaX === 0 && deltaY === 0) {return}
     endTime = +new Date - startTime
     if (_currentScroller.cfg.momentum) {
       mx = dir === 1 ? {duration: 0, destination: 0} : getLocation(point.x, point.x + deltaX, endTime, _currentScroller.maxScrollWidth, wrapperSize.width, deceleration)
       my = dir === 0 ? {duration: 0, destination: 0} : getLocation(point.y, point.y + deltaY, endTime, _currentScroller.maxScrollHeight, wrapperSize.height, deceleration)
       time = Math.max(mx.duration, my.duration)
+      
+      //吸附边界
+      mx.destination = mx.destination > 0 ? 0 : (mx.destination < maxScrollWidth ? maxScrollWidth : mx.destination)
+      my.destination = my.destination > 0 ? 0 : (my.destination < maxScrollHeight ? maxScrollHeight : my.destination)
+
       _currentScroller.scrollTo(mx.destination, my.destination, time)
     }
-    
+    _currentScroller.cfg.ontouchend && _currentScroller.cfg.ontouchend.apply(_currentScroller)
     _touchedScroller = []
   }
   //drag end
@@ -289,9 +304,32 @@
   }
   
   function _scrollTo (x, y, time) {
+    _cancelAnimate.apply(this)
     _animate.call(this, {
       duration: time,
       x: x,
+      y: y
+    })
+    this.jBox.addClass('active')
+    return this
+  }
+  
+  function _scrollXTo (x, time) {
+    _cancelAnimate.apply(this)
+    _animate.call(this, {
+      duration: time,
+      x: x,
+      y: this.current.y
+    })
+    this.jBox.addClass('active')
+    return this
+  }
+  
+  function _scrollYTo (y, time) {
+    _cancelAnimate.apply(this)
+    _animate.call(this, {
+      duration: time,
+      x: this.current.x,
       y: y
     })
     this.jBox.addClass('active')
@@ -317,7 +355,7 @@
   }
   
   function _init () {
-    var w, h, dir, box
+    var w, h, dir, box, x, y
     this.jScrollBox = this.jBox.children().eq(0)
     box = {
       width: this.jBox.width(),
@@ -325,6 +363,8 @@
     }
     w = box.width - this.jScrollBox.width()
     h = box.height - this.jScrollBox.height()
+    x = this.cfg.x || 0
+    y = this.cfg.y || 0
     //0 左右； 1 上下； 2 两个方向； -1 不能滚动
     dir = w < 0 ? (h < 0 ? 2 : 0) : (h < 0 ? 1 : -1)
     if (dir === -1) {return}
@@ -333,15 +373,11 @@
     this.maxScrollHeight = h
     this.wrapperSize = box
     this.point = {
-      x: 0,
-      y: 0
-    }
-    this.current = {
-      x: 0,
-      y: 0
+      x: x,
+      y: y
     }
     
-    if (this.cfg.scrollBar) {
+    if (this.cfg.scrollbar) {
       this.jBox.append('<div class="scrollbar-x scrollbar"><div class="bar"></div></div><div class="scrollbar-y scrollbar"><div class="bar"></div></div>')
       this.jScrollBarX = this.jBox.find('.scrollbar-x')
       this.jScrollBarY = this.jBox.find('.scrollbar-y')
@@ -357,6 +393,18 @@
     
     _bind.apply(this)
     _scrollerCount++
+    
+    _setDist.call(this, x, y)
+  }
+  
+  function _refresh (cfg) {
+    var x = this.current.x,
+      y = this.current.y
+    _scrollerCount--
+    this.jBox.find('.scrollbar').remove()
+    this.cfg = $.extend(this.cfg, {x: x, y: y}, cfg)
+    _init.apply(this)
+    return this
   }
   
   /**
@@ -388,6 +436,9 @@
   
   NiceScroller.prototype = {
     scrollTo: _scrollTo,
+    scrollXTo: _scrollXTo,
+    scrollYTo: _scrollYTo,
+    refresh: _refresh,
     destroy: _destroy
   }
   
