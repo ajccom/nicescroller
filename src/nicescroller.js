@@ -274,6 +274,7 @@
       _currentScroller.scrollTo(mx.destination, my.destination, time)
     }
     _currentScroller.cfg.ontouchend && _currentScroller.cfg.ontouchend.apply(_currentScroller)
+    _currentScroller = null
     _touchedScroller = []
   }
   //drag end
