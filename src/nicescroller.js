@@ -14,17 +14,24 @@
   var _prefix = (function () {
     var div = document.createElement('div'),
       style = div.style,
-      arr = ['WebkitT', 'MozT', 'MsT'],
+    /*  arr = ['WebkitT', 'MozT', 'MsT'],
       temp = '',
       i = 0,
-      l = 3,
+      l = 3,*/
+      
       result = ''
-    for (i; i < l; i++) {
+      
+    /*for (i; i < l; i++) {
       temp = arr[i]
       if (typeof style[temp + 'ransform'] !== 'undefined') {
         result = '-' + temp.replace('T', '').toLowerCase() + '-'
         break
       }
+    }*/
+    if (style.WebkitTransform === '') {
+      result = '-webkit-'
+    } else if (style.MozTransform === '') {
+      result = '-moz-'
     }
     return result
   }())
