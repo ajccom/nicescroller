@@ -275,8 +275,8 @@
       time = Math.max(mx.duration, my.duration)
       
       //吸附边界
-      mx.destination = mx.destination > 0 ? 0 : (mx.destination < maxScrollWidth ? maxScrollWidth : mx.destination)
-      my.destination = my.destination > 0 ? 0 : (my.destination < maxScrollHeight ? maxScrollHeight : my.destination)
+      mx.destination = mx.destination > 0 ? (time += 300, 0) : (mx.destination < maxScrollWidth ? (time += 300, maxScrollWidth) : mx.destination)
+      my.destination = my.destination > 0 ? (time += 300, 0) : (my.destination < maxScrollHeight ? (time += 300, maxScrollHeight) : my.destination)
 
       _currentScroller.scrollTo(mx.destination, my.destination, time)
     }
