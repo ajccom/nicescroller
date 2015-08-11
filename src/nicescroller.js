@@ -3,31 +3,24 @@
   
   //兼容PC与移动端事件
   var _mobileCheck = 'ontouchend' in document,
+    _pointCheck = window.PointerEvent || window.MSPointerEvent,
+    _prefixPointerEvent = function (pointerEvent) {
+      return window.MSPointerEvent ? 
+        'MSPointer' + pointerEvent.charAt(9).toUpperCase() + pointerEvent.substr(10) : pointerEvent
+    },
     ev = {
       click: 'click',
-      start: _mobileCheck ? 'touchstart' : 'mousedown',
-      move: _mobileCheck ? 'touchmove' : 'mousemove',
-      end: _mobileCheck ? 'touchend' : 'mouseup'
+      start: _mobileCheck ? (_pointCheck ? _prefixPointerEvent('pointerdown') : 'touchstart' ) : 'mousedown',
+      move: _mobileCheck ? (_pointCheck ? _prefixPointerEvent('pointermove') : 'touchmove') : 'mousemove',
+      end: _mobileCheck ? (_pointCheck ? _prefixPointerEvent('pointerup') : 'touchend') : 'mouseup',
+      cancel: _mobileCheck ? (_pointCheck ? _prefixPointerEvent('pointercancel') : 'touchcancel') : 'mousecancel'
     }
   
   //获取浏览器前缀
   var _prefix = (function () {
     var div = document.createElement('div'),
       style = div.style,
-    /*  arr = ['WebkitT', 'MozT', 'MsT'],
-      temp = '',
-      i = 0,
-      l = 3,*/
-      
       result = ''
-      
-    /*for (i; i < l; i++) {
-      temp = arr[i]
-      if (typeof style[temp + 'ransform'] !== 'undefined') {
-        result = '-' + temp.replace('T', '').toLowerCase() + '-'
-        break
-      }
-    }*/
     if (style.WebkitTransform === '') {
       result = '-webkit-'
     } else if (style.MozTransform === '') {
@@ -145,6 +138,7 @@
         currentY = args.y
         _setDist.call(that, currentX, currentY)
         that.jBox.removeClass('active')
+        that._isAdded = false
         that.cfg.onscrollend && that.cfg.onscrollend.apply(that)
         return
       }
@@ -207,6 +201,8 @@
     startTime,
     endTime,
     _bound = false,
+    _isLock = false,
+    _isChecked = false,
     _scrollerCount = 0
     
   /**
@@ -240,18 +236,30 @@
     m = o
     _setPoint.call(this)
     startTime = +new Date
-    
+    _isLock = true
+    _isChecked = false
   }
   
   function _move (e) {
     _currentScroller = _touchedScroller[0]
     if (!_currentScroller || !_currentScroller.touched) {return}
-    _currentScroller.jBox.addClass('active')
+    if (!_currentScroller._isAdded) {//避免频繁操作DOM
+      _currentScroller.jBox.addClass('active')
+      _currentScroller._isAdded = true
+    }
     m = _getXY(e)
     var dir = _currentScroller.dir,
+      dx = m.x - o.x,
+      dy = m.y - o.y,
       point = _currentScroller.point
-    _handleMove.call(_currentScroller, dir === 1 ? 0 : point.x + m.x - o.x, dir === 0 ? 0 : point.y + m.y - o.y)
-    e.preventDefault()
+    _handleMove.call(_currentScroller, dir === 1 ? 0 : point.x + dx, dir === 0 ? 0 : point.y + dy)
+    if (!_isChecked) {
+      if (Math.abs(dx) < Math.abs(dy) && dir === 0) {_isLock = false}
+      _isChecked = true
+    }
+    if (_isLock) {
+      e.preventDefault()
+    }
   }
   
   function _end (e) {
@@ -269,7 +277,7 @@
       maxScrollHeight = _currentScroller.maxScrollHeight
     if (deltaX === 0 && deltaY === 0) {return}
     endTime = +new Date - startTime
-    if (_currentScroller.cfg.momentum) {
+    if (_currentScroller.cfg.momentum && endTime < 300) {
       mx = dir === 1 ? {duration: 0, destination: 0} : getLocation(point.x, point.x + deltaX, endTime, _currentScroller.maxScrollWidth, wrapperSize.width, deceleration)
       my = dir === 0 ? {duration: 0, destination: 0} : getLocation(point.y, point.y + deltaY, endTime, _currentScroller.maxScrollHeight, wrapperSize.height, deceleration)
       time = Math.max(mx.duration, my.duration)
@@ -319,6 +327,7 @@
       y: y
     })
     this.jBox.addClass('active')
+    this._isAdded = true
     return this
   }
   
@@ -330,6 +339,7 @@
       y: this.current.y
     })
     this.jBox.addClass('active')
+    this._isAdded = true
     return this
   }
   
@@ -341,6 +351,7 @@
       y: y
     })
     this.jBox.addClass('active')
+    this._isAdded = true
     return this
   }
   
@@ -352,13 +363,13 @@
     var that = this
     this.jScrollBox.on(ev.start, function (e) {_start.call(that, e)})
     if (!_bound) {
-      $(document).on(ev.move, _move).on(ev.end, _end)
+      $(document).on(ev.move, _move).on(ev.end, _end).on(ev.cancel, _end)
       _bound = true
     }
   }
   
   function _unbind () {
-    $(document).off(ev.move, _move).off(ev.end, _end)
+    $(document).off(ev.move, _move).off(ev.end, _end).off(ev.cancel, _end)
     _bound = false
   }
   
