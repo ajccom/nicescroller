@@ -20,20 +20,7 @@
   var _prefix = (function () {
     var div = document.createElement('div'),
       style = div.style,
-    /*  arr = ['WebkitT', 'MozT', 'MsT'],
-      temp = '',
-      i = 0,
-      l = 3,*/
-      
       result = ''
-      
-    /*for (i; i < l; i++) {
-      temp = arr[i]
-      if (typeof style[temp + 'ransform'] !== 'undefined') {
-        result = '-' + temp.replace('T', '').toLowerCase() + '-'
-        break
-      }
-    }*/
     if (style.WebkitTransform === '') {
       result = '-webkit-'
     } else if (style.MozTransform === '') {
@@ -214,6 +201,8 @@
     startTime,
     endTime,
     _bound = false,
+    _isLock = false,
+    _isChecked = false,
     _scrollerCount = 0
     
   /**
@@ -247,7 +236,8 @@
     m = o
     _setPoint.call(this)
     startTime = +new Date
-    
+    _isLock = true
+    _isChecked = false
   }
   
   function _move (e) {
@@ -263,7 +253,13 @@
       dy = m.y - o.y,
       point = _currentScroller.point
     _handleMove.call(_currentScroller, dir === 1 ? 0 : point.x + dx, dir === 0 ? 0 : point.y + dy)
-    if (dir !== 0) {e.preventDefault()}
+    if (!_isChecked) {
+      if (Math.abs(dx) < Math.abs(dy) && dir === 0) {_isLock = false}
+      _isChecked = true
+    }
+    if (_isLock) {
+      e.preventDefault()
+    }
   }
   
   function _end (e) {
