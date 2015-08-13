@@ -165,7 +165,6 @@
   
   var _defaultConfig = {
     scrollbar: true,
-    momentum: true,
     animation: 'ease-out',
     //x: 0,
     //y: 0,
@@ -277,17 +276,23 @@
       maxScrollHeight = _currentScroller.maxScrollHeight
     if (deltaX === 0 && deltaY === 0) {return}
     endTime = +new Date - startTime
-    if (_currentScroller.cfg.momentum && endTime < 300) {
+    if (endTime < 300) {
       mx = dir === 1 ? {duration: 0, destination: 0} : getLocation(point.x, point.x + deltaX, endTime, _currentScroller.maxScrollWidth, wrapperSize.width, deceleration)
       my = dir === 0 ? {duration: 0, destination: 0} : getLocation(point.y, point.y + deltaY, endTime, _currentScroller.maxScrollHeight, wrapperSize.height, deceleration)
       time = Math.max(mx.duration, my.duration)
-      
+    } else {
       //吸附边界
-      mx.destination = mx.destination > 0 ? (time += 300, 0) : (mx.destination < maxScrollWidth ? (time += 300, maxScrollWidth) : mx.destination)
-      my.destination = my.destination > 0 ? (time += 300, 0) : (my.destination < maxScrollHeight ? (time += 300, maxScrollHeight) : my.destination)
-
-      _currentScroller.scrollTo(mx.destination, my.destination, time)
+      mx = dir === 1 ? {duration: 0, destination: 0} : {duration: 300, destination: point.x + deltaX}
+      my = dir === 0 ? {duration: 0, destination: 0} : {duration: 300, destination: point.y + deltaY}
+      time = 300
     }
+    
+    //吸附边界
+    mx.destination = mx.destination > 0 ? (time += 300, 0) : (mx.destination < maxScrollWidth ? (time += 300, maxScrollWidth) : mx.destination)
+    my.destination = my.destination > 0 ? (time += 300, 0) : (my.destination < maxScrollHeight ? (time += 300, maxScrollHeight) : my.destination)
+
+    _currentScroller.scrollTo(mx.destination, my.destination, time)
+    
     _currentScroller.cfg.ontouchend && _currentScroller.cfg.ontouchend.apply(_currentScroller)
     _currentScroller = null
     _touchedScroller = []
@@ -322,7 +327,7 @@
   function _scrollTo (x, y, time) {
     _cancelAnimate.apply(this)
     _animate.call(this, {
-      duration: time,
+      duration: time || 300,
       x: x,
       y: y
     })
