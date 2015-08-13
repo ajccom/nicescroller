@@ -1,7 +1,9 @@
 "use strict"
 ;(function ($) {
   
-  //兼容PC与移动端事件
+  /**
+   * 兼容PC与移动端事件
+   */
   var _mobileCheck = 'ontouchend' in document,
     _pointCheck = window.PointerEvent || window.MSPointerEvent,
     _prefixPointerEvent = function (pointerEvent) {
@@ -16,7 +18,9 @@
       cancel: _mobileCheck ? (_pointCheck ? _prefixPointerEvent('pointercancel') : 'touchcancel') : 'mousecancel'
     }
   
-  //获取浏览器前缀
+  /**
+   * 获取浏览器前缀
+   */
   var _prefix = (function () {
     var div = document.createElement('div'),
       style = div.style,
@@ -47,6 +51,10 @@
     if (this.cfg.scrollbar) {_updateBar.apply(this)}
   }
   
+  /**
+   * 更新滚动条
+   * @type {Function} 
+   */
   function _updateBar () {
     var c = this.current,
       d = {},
@@ -95,7 +103,12 @@
     $.extend(_animationFunction, obj)
   }*/
   
-  //计时器
+  /**
+   * 添加计时器
+   * @type {Function} 
+   * @param {Function} fn 回调函数
+   * @return 计时器对象
+   */
   function _rAF (fn) {
     var a = (window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
@@ -105,6 +118,11 @@
     return a
   }
   
+  /**
+   * 注销计时器
+   * @type {Function} 
+   * @param {Object} id 计时器对象
+   */
   function _cAF (id) {
     (window.cancelAnimationFrame ||
     window.webkitCancelAnimationFrame ||
@@ -113,6 +131,11 @@
     clearTimeout)(id)
   }
   
+  /**
+   * 添加动画
+   * @type {Function} 
+   * @param {Object} args 动画所需参数
+   */
   function _animate (args) {
     var startTime = +new Date, 
       pastTime = 0,
@@ -151,7 +174,7 @@
   }
   
   /**
-   * 取消动画函数
+   * 取消动画
    * @type {Function}
    */
   function _cancelAnimate () {
@@ -159,10 +182,8 @@
   }
   
   /**
-   * 解决模拟滑动效果
-   * @usage new NiceScroller('.scroll')
+   * 默认配置项
    */
-  
   var _defaultConfig = {
     scrollbar: true,
     momentum: true,
@@ -185,6 +206,10 @@
     return $.extend({}, _defaultConfig, cfg)
   }
   
+  /**
+   * 设置起始点
+   * @type {Function} 
+   */
   function _setPoint () {
     var dir = this.dir,
       point = this.point,
@@ -226,7 +251,12 @@
     
     return {x: x, y: y} 
   }
-    
+  
+  /**
+   * 接触时回调方法
+   * @type {Function} 
+   * @param {Object} e 事件对象
+   */
   function _start (e) {
     if (this.cfg.ontouchstart && !this.cfg.ontouchstart.apply(this)) {return}
     _cancelAnimate.apply(this)
@@ -240,6 +270,11 @@
     _isChecked = false
   }
   
+  /**
+   * 移动时回调方法
+   * @type {Function} 
+   * @param {Object} e 事件对象
+   */
   function _move (e) {
     _currentScroller = _touchedScroller[0]
     if (!_currentScroller || !_currentScroller.touched) {return}
@@ -262,6 +297,11 @@
     }
   }
   
+  /**
+   * 结束时回调方法
+   * @type {Function} 
+   * @param {Object} e 事件对象
+   */
   function _end (e) {
     if (!_currentScroller) {return}
     _currentScroller.touched = false
@@ -294,6 +334,16 @@
   }
   //drag end
   
+  /**
+   * 势能效果方法
+   * @type {Function} 
+   * @param {Number} current 起始的位置
+   * @param {Number} start 当前的位置
+   * @param {Number} time 触摸滑动时间
+   * @param {Number} lowerMargin 最大移动距离
+   * @param {Number} wrapperSize 父窗口在该方向的大小(宽或高)
+   * @param {Number} deceleration 系数
+   */
   function getLocation (current, start, time, lowerMargin, wrapperSize, deceleration) {
     var distance = start - current,
       speed = Math.abs(distance) / time,
@@ -319,6 +369,13 @@
     }
   }
   
+  /**
+   * 滑动至
+   * @type {Function} 
+   * @param {Number} x x轴数值
+   * @param {Number} y y轴数值
+   * @param {Number} time 动画时间
+   */
   function _scrollTo (x, y, time) {
     _cancelAnimate.apply(this)
     _animate.call(this, {
@@ -331,6 +388,12 @@
     return this
   }
   
+  /**
+   * x轴滑动至
+   * @type {Function} 
+   * @param {Number} x x轴数值
+   * @param {Number} time 动画时间
+   */
   function _scrollXTo (x, time) {
     _cancelAnimate.apply(this)
     _animate.call(this, {
@@ -343,6 +406,12 @@
     return this
   }
   
+  /**
+   * y轴滑动至
+   * @type {Function} 
+   * @param {Number} y y轴数值
+   * @param {Number} time 动画时间
+   */
   function _scrollYTo (y, time) {
     _cancelAnimate.apply(this)
     _animate.call(this, {
@@ -355,10 +424,20 @@
     return this
   }
   
+  /**
+   * 设置元素位置
+   * @type {Function} 
+   * @param {Number} x x轴数值
+   * @param {Number} y y轴数值
+   */
   function _handleMove (x, y) {
     _setDist.call(this, x, y)
   }
   
+  /**
+   * 绑定事件
+   * @type {Function} 
+   */
   function _bind () {
     var that = this
     this.jScrollBox.on(ev.start, function (e) {_start.call(that, e)})
@@ -368,11 +447,19 @@
     }
   }
   
+  /**
+   * 解绑事件
+   * @type {Function} 
+   */
   function _unbind () {
     $(document).off(ev.move, _move).off(ev.end, _end).off(ev.cancel, _end)
     _bound = false
   }
   
+  /**
+   * 初始化
+   * @type {Function} 
+   */
   function _init () {
     var w, h, dir, box, x, y
     this.jScrollBox = this.jBox.children().eq(0)
@@ -416,6 +503,11 @@
     _setDist.call(this, x, y)
   }
   
+  /**
+   * 刷新方法，重新获取可滑动区域，默认不会变动当前位置
+   * @type {Function} 
+   * @param {Object} cfg 更新配置，可覆盖原配置
+   */
   function _refresh (cfg) {
     var x = this.current.x,
       y = this.current.y
@@ -445,6 +537,12 @@
     }
   }
   
+  /**
+   * NiceScroller类
+   * @type {Function} 
+   * @param {Object} ele DOM元素
+   * @param {Object} cfg 实例化配置，可覆盖默认配置
+   */
   function NiceScroller (ele, cfg) {
     this.jBox = $(ele)
     this.cfg = _handleConfig(cfg)
