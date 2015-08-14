@@ -37,7 +37,6 @@ var scroller = new NiceScroller('#scroller1')
 配置名 | 类型 | 默认值 | 说明
 ---- | ---- | ---- | ----
 scrollbar | Boolean | true | 是否出现滚动条
-momentum | Boolean | true | 是否使用惯性滑动
 animation | String | ease-out | 自定义动画效果
 x | Number | - | 初始X轴位置
 y | Number | - | 初始Y轴位置
