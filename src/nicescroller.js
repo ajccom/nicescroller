@@ -139,7 +139,7 @@
   function _animate (args) {
     var startTime = +new Date, 
       pastTime = 0,
-      currentX, currentY, time = args.duration,
+      currentX, currentY, time = typeof args.duration === 'number' ? args.duration : 0,
       startX = this.current.x,
       startY = this.current.y,
       distenceX = args.x - startX,
@@ -384,7 +384,7 @@
   function _scrollTo (x, y, time) {
     _cancelAnimate.apply(this)
     _animate.call(this, {
-      duration: typeof time === 'number' ? time : 0,
+      duration: time,
       x: x,
       y: y
     })
@@ -402,7 +402,7 @@
   function _scrollXTo (x, time) {
     _cancelAnimate.apply(this)
     _animate.call(this, {
-      duration: typeof time === 'number' ? time : 0,
+      duration: time,
       x: x,
       y: this.current.y
     })
@@ -420,7 +420,7 @@
   function _scrollYTo (y, time) {
     _cancelAnimate.apply(this)
     _animate.call(this, {
-      duration: typeof time === 'number' ? time : 0,
+      duration: time,
       x: this.current.x,
       y: y
     })
