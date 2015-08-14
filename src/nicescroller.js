@@ -384,7 +384,7 @@
   function _scrollTo (x, y, time) {
     _cancelAnimate.apply(this)
     _animate.call(this, {
-      duration: time || 300,
+      duration: typeof time === 'number' ? time : 0,
       x: x,
       y: y
     })
@@ -402,7 +402,7 @@
   function _scrollXTo (x, time) {
     _cancelAnimate.apply(this)
     _animate.call(this, {
-      duration: time,
+      duration: typeof time === 'number' ? time : 0,
       x: x,
       y: this.current.y
     })
@@ -420,7 +420,7 @@
   function _scrollYTo (y, time) {
     _cancelAnimate.apply(this)
     _animate.call(this, {
-      duration: time,
+      duration: typeof time === 'number' ? time : 0,
       x: this.current.x,
       y: y
     })
