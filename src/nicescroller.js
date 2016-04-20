@@ -466,20 +466,25 @@
    * @type {Function} 
    */
   function _init () {
-    var w, h, dir, box, x, y
+    var w, h, dir, box, x, y, scrollBox
     this.jScrollBox = this.jBox.children().eq(0)
     box = {
       width: this.jBox.width(),
       height: this.jBox.height()
     }
-    w = box.width - this.jScrollBox.width()
-    h = box.height - this.jScrollBox.height()
+    scrollBox = {
+      width: this.jScrollBox.width(),
+      height: this.jScrollBox.height()
+    }
+    w = box.width - scrollBox.width
+    h = box.height - scrollBox.height
     x = this.cfg.x || 0
     y = this.cfg.y || 0
     //0 左右； 1 上下； 2 两个方向； -1 不能滚动
     dir = w < 0 ? (h < 0 ? 2 : 0) : (h < 0 ? 1 : -1)
-    if (dir === -1) {return}
+    _scrollerCount++
     this.dir = dir
+    if (dir === -1) {return}
     this.maxScrollWidth = w
     this.maxScrollHeight = h
     this.wrapperSize = box
@@ -493,8 +498,8 @@
       this.jScrollBarX = this.jBox.find('.scrollbar-x')
       this.jScrollBarY = this.jBox.find('.scrollbar-y')
       this.barSize = {
-        x: box.width / -w * box.width,
-        y: box.height / -h * box.height
+        x: box.width / scrollBox.width * box.width,
+        y: box.height / scrollBox.height * box.height
       }
       this.jBarX = this.jScrollBarX.find('.bar').width(this.barSize.x)
       this.jBarY = this.jScrollBarY.find('.bar').height(this.barSize.y)
@@ -503,7 +508,6 @@
     }
     
     _bind.apply(this)
-    _scrollerCount++
     
     _setDist.call(this, x, y)
   }
